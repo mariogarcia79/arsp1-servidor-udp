@@ -25,7 +25,7 @@ qotd_server_send_quote
 
     FILE *fd;
     int pos = 0;
-    char buffer[MAX_QUOTE_LEN];
+    char buffer[MAX_QUOTE_LEN] = {0};
 
     system("/usr/games/fortune -s > /tmp/quote.txt");
     fd = fopen("/tmp/quote.txt", "r");
