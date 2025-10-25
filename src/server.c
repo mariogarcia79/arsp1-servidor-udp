@@ -8,10 +8,6 @@
 #include <netdb.h>
 #include <netinet/in.h>
 
-#include "argparse.h"
-#include "config.h"
-#include "qotd.h"
-
 #define MAX_QUOTE_LEN 1000
 #define STRING_USAGE "Usage: %s [-s service]\n"
 #define STRING_QUOTE_HEADER "Quote Of The Day from"
