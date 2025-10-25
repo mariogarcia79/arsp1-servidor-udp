@@ -88,9 +88,9 @@ qotd_server_listen(int sockfd)
     memset(quote, 0, total_size);
 
     // Only pass the quote header
-    snprintf(quote, total_size, "%s %s:\n", STRING_QUOTE_HEADER, hostname, total_size);
+    snprintf(quote, total_size, "%s %s:\n", STRING_QUOTE_HEADER, hostname);
 
-    qotd_server_send_quote(sockfd, &client_addr, quote);
+    qotd_server_send_quote(sockfd, &client_addr, quote, total_size);
 
     free(quote);
     return 0;
