@@ -38,7 +38,7 @@ qotd_server_send_quote
     buffer[pos - 1] = '\0';
     fclose(fd);
 
-    snprintf(quote + strlen(quote), MAX_QUOTE_LEN - strlen(quote), "%s%s", buffer, "\n");
+    //strcat(quote, buffer);
 
     // Send quote message
     err = sendto(sockfd, quote, strlen(quote), 0,
