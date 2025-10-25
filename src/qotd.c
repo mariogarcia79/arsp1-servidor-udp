@@ -19,7 +19,8 @@ qotd_server_send_quote
 (
     int sockfd,
     struct sockaddr_in *client_addr,
-    char *quote
+    char *quote,
+    size_t total_size
 ){
     int err;
 
@@ -41,7 +42,7 @@ qotd_server_send_quote
     strcat(quote, buffer);
 
     // Send quote message
-    err = sendto(sockfd, quote, sizeof(quote), 0,
+    err = sendto(sockfd, quote, total_size, 0,
             (struct sockaddr *)client_addr, (socklen_t)sizeof(*client_addr));
     if (err == -1) {
         perror("sendto");
@@ -60,6 +61,7 @@ qotd_server_listen(int sockfd)
     char hostname[256]; // Maximum hostname size
     struct sockaddr_in client_addr;
     socklen_t client_addr_len = sizeof(client_addr);
+    size_t total_size;
 
     err = gethostname(hostname, sizeof(hostname));
     if (err != 0) {
@@ -73,10 +75,10 @@ qotd_server_listen(int sockfd)
         goto exit_error_socket;
     }
 
-    size_t total_size = strlen(STRING_QUOTE_HEADER) +
-                        strlen(hostname) +
-                        MAX_QUOTE_LEN +
-                        5; // Account for separators
+    total_size =    strlen(STRING_QUOTE_HEADER) +
+                    strlen(hostname) +
+                    MAX_QUOTE_LEN +
+                    5; // Account for separators
     quote = (char *)malloc(total_size);
     if (!quote) {
         perror("malloc");
@@ -86,7 +88,7 @@ qotd_server_listen(int sockfd)
     memset(quote, 0, total_size);
 
     // Only pass the quote header
-    snprintf(quote, total_size, "%s %s:\n", STRING_QUOTE_HEADER, hostname);
+    snprintf(quote, total_size, "%s %s:\n", STRING_QUOTE_HEADER, hostname, total_size);
 
     qotd_server_send_quote(sockfd, &client_addr, quote);
 
