@@ -83,11 +83,10 @@ qotd_server_listen(int sockfd)
         goto exit_error_socket;
     }
 
+    memset(quote, 0, total_size);
+
     // Only pass the quote header
-    strcpy(quote, STRING_QUOTE_HEADER);
-    strcat(quote, " ");
-    strcat(quote, hostname);
-    strcat(quote, ":\n");
+    snprintf(quote, total_size, "%s %s:\n", STRING_QUOTE_HEADER, hostname);
 
     qotd_server_send_quote(sockfd, &client_addr, quote);
 
