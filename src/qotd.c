@@ -38,6 +38,7 @@ qotd_server_get_quote(void)
         return NULL;
     
     strcpy(ret, buffer);
+    printf(ret);
     return ret;
 }
 
