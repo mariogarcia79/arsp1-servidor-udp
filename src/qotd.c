@@ -14,6 +14,13 @@
 
 #define MAX_QUOTE_LEN 1000
 
+/*
+ * qotd_server_send_quote
+ * This functions fetches the actual quote, appends it to the header passed
+ * as argument to the function (should already have memory allocated), and 
+ * then sends the whole datagram.
+ * Returns 0 on success and -1 on error (sets errno).
+ */
 int
 qotd_server_send_quote
 (
@@ -28,6 +35,7 @@ qotd_server_send_quote
     int pos = 0;
     char buffer[MAX_QUOTE_LEN];
 
+    // Fetch the quote
     system("/usr/games/fortune -s > /tmp/quote.txt");
     fd = fopen("/tmp/quote.txt", "r");
     
@@ -39,20 +47,27 @@ qotd_server_send_quote
     buffer[pos - 1] = '\0';
     fclose(fd);
 
+    // Append the actual quote to the message.
+    // Memory for the message was already allocated.
     strcat(quote, buffer);
 
-    // Send quote message
+    // Send quote datagram
     err = sendto(sockfd, quote, total_size, 0,
             (struct sockaddr *)client_addr, (socklen_t)sizeof(*client_addr));
     if (err == -1) {
         perror("sendto");
-        close(sockfd);
         return -1;
     }
 
     return 0;
 }
 
+/*
+ * qotd_server_listen
+ * Gets the hostname of the machine to craft the QOTD message header,
+ * then waits for incomming requests, and upon receipt crafts the header
+ * and sends it using the qotd_server_send_quote() function.
+ */
 int
 qotd_server_listen(int sockfd)
 {
@@ -94,7 +109,9 @@ qotd_server_listen(int sockfd)
     // Only pass the quote header
     snprintf(quote, total_size, "%s %s:\n", STRING_QUOTE_HEADER, hostname);
 
-    qotd_server_send_quote(sockfd, &client_addr, quote, total_size);
+    err = qotd_server_send_quote(sockfd, &client_addr, quote, total_size);
+    if (err == -1)
+        goto exit_error_socket;
 
     free(quote);
     return 0;
@@ -106,6 +123,11 @@ exit_error_socket:
     return -1;
 }
 
+/*
+ * qotd_setup_socket
+ * This function fetches a port, creates a socket, binds the IP address
+ * to the socket and returns the socket file descriptor.
+ */
 int
 qotd_setup_socket(
     struct arguments   *args,
