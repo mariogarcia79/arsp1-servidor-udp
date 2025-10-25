@@ -12,7 +12,7 @@
 #include "config.h"
 #include "qotd.h"
 
-#define MAX_QUOTE_LEN 100
+#define MAX_QUOTE_LEN 1000
 
 int
 qotd_server_send_quote
