@@ -22,25 +22,26 @@ qotd_server_send_quote
     char *quote
 ){
     int err;
-
     FILE *fd;
     int pos = 0;
     char buffer[MAX_QUOTE_LEN];
 
-    memset(buffer, 0, MAX_QUOTE_LEN);
-
     system("/usr/games/fortune -s > /tmp/quote.txt");
+
     fd = fopen("/tmp/quote.txt", "r");
-    
-    do {
-        buffer[pos] = fgetc(fd);
+    if (fd == NULL) {
+        perror("fopen");
+        return -1;
+    }
+
+    while (pos < (MAX_QUOTE_LEN - 1) &&
+    (buffer[pos] = fgetc(fd)) != EOF) {
         pos++;
-    } while( pos < (MAX_QUOTE_LEN - 2) && !feof(fd) );
+    }
 
-    buffer[pos - 1] = '\0';
-    fclose(fd);
+    buffer[pos] = '\0';
 
-    //strcat(quote, buffer);
+    strcat(quote, buffer);
 
     // Send quote message
     err = sendto(sockfd, buffer, strlen(buffer), 0,
