@@ -12,7 +12,7 @@
 #include "config.h"
 #include "qotd.h"
 
-#define MAX_QUOTE_LEN 1000
+#define MAX_QUOTE_LEN 100
 
 int
 qotd_server_send_quote
@@ -25,7 +25,9 @@ qotd_server_send_quote
 
     FILE *fd;
     int pos = 0;
-    char buffer[MAX_QUOTE_LEN] = {0};
+    char buffer[MAX_QUOTE_LEN];
+
+    memset(buffer, 0, MAX_QUOTE_LEN);
 
     system("/usr/games/fortune -s > /tmp/quote.txt");
     fd = fopen("/tmp/quote.txt", "r");
