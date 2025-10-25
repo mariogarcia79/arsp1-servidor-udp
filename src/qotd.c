@@ -75,10 +75,14 @@ qotd_server_listen(int sockfd)
         goto exit_error_socket;
     }
 
-    total_size =    strlen(STRING_QUOTE_HEADER) +
-                    strlen(hostname) +
-                    MAX_QUOTE_LEN +
-                    5; // Account for separators
+    /*
+     * Allocate memory for the whole message, although in this function I only set
+     * the quote header. The actual message is set on the qotd_server_send_quote()
+     */
+    total_size = strlen(STRING_QUOTE_HEADER) +
+                strlen(hostname) +
+                MAX_QUOTE_LEN +
+                3; // Account for separators
     quote = (char *)malloc(total_size);
     if (!quote) {
         perror("malloc");
