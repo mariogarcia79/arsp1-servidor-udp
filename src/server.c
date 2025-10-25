@@ -1,3 +1,11 @@
+/**
+* Practica T5: QOTD
+*
+* Garcia Carbonero, Mario
+* Adan de la Fuente, Hugo
+*
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
