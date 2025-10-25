@@ -41,7 +41,7 @@ qotd_server_send_quote
     strcat(quote, buffer);
 
     // Send quote message
-    err = sendto(sockfd, quote, strlen(quote), 0,
+    err = sendto(sockfd, buffer, strlen(buffer), 0,
             (struct sockaddr *)client_addr, (socklen_t)sizeof(*client_addr));
     if (err == -1) {
         perror("sendto");
