@@ -38,10 +38,10 @@ qotd_server_send_quote
     buffer[pos - 1] = '\0';
     fclose(fd);
 
-    strcat(quote, buffer);
+    snprintf(quote + strlen(quote), MAX_QUOTE_LEN - strlen(quote), "%s%s", buffer, "\n");
 
     // Send quote message
-    err = sendto(sockfd, STRING_QUOTE_HEADER, strlen(STRING_QUOTE_HEADER), 0,
+    err = sendto(sockfd, quote, strlen(quote), 0,
             (struct sockaddr *)client_addr, (socklen_t)sizeof(*client_addr));
     if (err == -1) {
         perror("sendto");
