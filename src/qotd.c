@@ -68,10 +68,29 @@ qotd_server_listen(int sockfd)
 {
     int err;
     char *quote = NULL;
-    char *quote_buff;
     char hostname[256]; // Maximum hostname size
     struct sockaddr_in client_addr;
     socklen_t client_addr_len = sizeof(client_addr);
+
+    FILE *fd;
+    int pos = 0;
+    char *ret;
+    char buffer[MAX_QUOTE_LEN];
+    
+    //------------------------------------------------------------------------------------
+    system("/usr/games/fortune -s > /tmp/quote.txt");
+    fd = fopen("/tmp/quote.txt", "r");
+    
+    do {
+        buffer[pos] = fgetc(fd);
+        pos++;
+    } while( pos < (MAX_QUOTE_LEN - 2) && !feof(fd) );
+
+    buffer[pos - 1] = '\0';
+    fclose(fd);
+    //------------------------------------------------------------------------------------
+
+    printf(buffer);
 
     err = gethostname(hostname, sizeof(hostname));
     if (err != 0) {
@@ -95,21 +114,15 @@ qotd_server_listen(int sockfd)
         goto exit_error_socket;
     }
 
-    quote_buff = qotd_server_get_quote();
-    if (!quote_buff)
-        goto exit_error_socket;
-
     strcpy(quote, STRING_QUOTE_HEADER);
     strcat(quote, " ");
     strcat(quote, hostname);
     strcat(quote, "\n");
-    strcat(quote, quote_buff);
+    strcat(quote, buffer);
 
     qotd_server_send_quote(sockfd, &client_addr, quote);
 
     free(quote);
-    free(quote_buff);
-
     return 0;
 
 exit_error_socket:
