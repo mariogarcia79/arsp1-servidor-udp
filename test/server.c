@@ -149,7 +149,7 @@ qotd_server_listen
  * Returns 0 on success and -1 on error (sets errno).
  */
 int
-qotd_server_send_quote
+qotd_child_send_quote
 (
     int clientfd,
     char *quote,
@@ -195,7 +195,7 @@ qotd_server_send_quote
 int
 qotd_child_answer
 (
-    int sockfd
+    int clientfd
 )
 {
     int err;
@@ -203,7 +203,7 @@ qotd_child_answer
     char hostname[256]; // Maximum hostname size
     size_t total_size;
 
-    err = recv(sockfd, NULL, 0, 0);
+    err = recv(clientfd, NULL, 0, 0);
     if (err == -1) {
         perror("recv");
         goto exit_error_socket;
@@ -228,26 +228,26 @@ qotd_child_answer
     // Only pass the quote header
     snprintf(quote, total_size, "%s %s:\n", STRING_QUOTE_HEADER, hostname);
 
-    err = qotd_server_send_quote(sockfd, quote, total_size);
+    err = qotd_child_send_quote(clientfd, quote, total_size);
     if (err == -1)
         goto exit_error_socket;
 
     free(quote);
 
-    if (shutdown(sockfd, SHUT_RDWR) == -1) {
+    if (shutdown(clientfd, SHUT_RDWR) == -1) {
         perror("shutdown");
         goto exit_error_socket;
     }
 
-    close(sockfd);
+    close(clientfd);
     return 0;
 
 // clean exit
 exit_error_socket:
     // No more receptions or transmissions
-    if (shutdown(sockfd, SHUT_RDWR) == -1)
+    if (shutdown(clientfd, SHUT_RDWR) == -1)
         perror("shutdown");
-    close(sockfd);
+    close(clientfd);
     return -1;
 }
 
