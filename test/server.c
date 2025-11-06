@@ -151,7 +151,7 @@ qotd_server_listen
 int
 qotd_server_send_quote
 (
-    int sockfd,
+    int clientfd,
     char *quote,
     size_t total_size
 ){
@@ -178,9 +178,14 @@ qotd_server_send_quote
     strcat(quote, buffer);
 
     // Send quote datagram
-    err = send(sockfd, quote, total_size, 0);
+    err = send(clientfd, quote, total_size, 0);
     if (err == -1) {
         perror("send");
+        return -1;
+    }
+
+    if (shutdown(clientfd, SHUT_RDWR) == -1) {
+        perror("shutdown");
         return -1;
     }
 
@@ -252,17 +257,17 @@ qotd_server_accept
     int sockfd
 ){
     int err;
+    int clientfd;
     struct sockaddr_in client_addr;
     socklen_t client_addr_len = sizeof(client_addr);
     
-
-    err = accept(sockfd, (struct sockaddr *) &client_addr, &client_addr_len);
-    if (err == -1) {
+    clientfd = accept(sockfd, (struct sockaddr *)&client_addr, &client_addr_len);
+    if (clientfd == -1) {
         perror("accept");
         goto exit_error_socket;
     }
     
-    return 0;
+    return clientfd;
 
 // clean exit
 exit_error_socket:
@@ -279,6 +284,7 @@ main (int argc, char *argv[])
     struct sockaddr_in myaddr = {0};
     struct arguments   args   = {0};
     int sockfd;
+    int clientfd;
     int err;
     pid_t pid;
 
@@ -297,8 +303,8 @@ main (int argc, char *argv[])
     if (sockfd == -1) exit(1);
 
     while(1) {
-        err = qotd_server_accept(sockfd);
-        if (err == -1)
+        clientfd = qotd_server_accept(sockfd);
+        if (clientfd == -1)
             goto exit_error_socket;
         
         pid = fork();
@@ -306,13 +312,14 @@ main (int argc, char *argv[])
             perror("fork failed");
             goto exit_error_socket;
         } else if (pid == 0) {
-            err = qotd_child_answer(sockfd);
+            err = qotd_child_answer(clientfd);
             if (err == -1)
                 goto exit_error_socket;
             return 0;
         } else {
             wait(NULL);
         }
+        
     }
 
     return 0;
