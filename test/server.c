@@ -210,12 +210,18 @@ qotd_child_answer
     char hostname[256]; // Maximum hostname size
     size_t total_size;
 
+    err = gethostname(hostname, sizeof(hostname));
+    if (err != 0) {
+        perror("gethostname");
+        goto exit_error_socket;
+    }
+
     err = recv(clientfd, NULL, 0, 0);
     if (err == -1) {
         perror("recv");
         goto exit_error_socket;
     }
-
+    
     /*
      * Allocate memory for the whole message, although in this function I only set
      * the quote header. The actual message is set on the qotd_server_send_quote()
