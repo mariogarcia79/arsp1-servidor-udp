@@ -138,6 +138,13 @@ qotd_server_listen
         return -1;
     }
 
+    // Listen to client requests for QOTD
+    if (listen(sockfd, 100) == -1) {
+        perror("listen");
+        close(sockfd);
+        return -1;
+    }
+
     return sockfd;
 }
 
